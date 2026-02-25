@@ -38,30 +38,59 @@ st.markdown(
     unsafe_allow_html=True,
 )
 
-# ── Sidebar: solve mode + unit toggle ──────────────────
+# ── Sidebar ─────────────────────────────────────────────
 with st.sidebar:
+    # Brand header
     st.markdown(
-        '<div class="section-header">SOLVE CONFIGURATION</div>',
+        '<div class="sidebar-brand">'
+        '<div class="sidebar-brand-dot"></div>'
+        '<div>'
+        '<div class="sidebar-brand-name">Thermal Analyzer</div>'
+        '<span class="sidebar-brand-tag">Quantum Lab Enclosures</span>'
+        '</div>'
+        '</div>',
         unsafe_allow_html=True,
     )
+
+    # Solve mode control group
+    _MODE_DESCRIPTIONS = {
+        SolveMode.AIRFLOW:   "\u2192 computing required airflow rate",
+        SolveMode.COOLANT:   "\u2192 computing coolant flow rate",
+        SolveMode.COIL_TEMP: "\u2192 computing coil leaving temperature",
+        SolveMode.HEATER:    "\u2192 computing heater requirement",
+    }
+    st.markdown('<div class="ctrl-group">', unsafe_allow_html=True)
+    st.markdown('<div class="ctrl-group-label">Solve Mode</div>', unsafe_allow_html=True)
     solve_mode = st.selectbox(
         "Solve mode",
         options=[sm for sm in SolveMode],
         format_func=lambda sm: sm.value,
+        label_visibility="collapsed",
     )
-    st.markdown("")  # spacer
-    use_imperial = st.toggle("Imperial units", value=True)
-
-    st.markdown("---")
     st.markdown(
-        '<div class="section-header">ABOUT</div>',
+        f'<span class="mode-desc">{_MODE_DESCRIPTIONS[solve_mode]}</span>',
         unsafe_allow_html=True,
     )
-    st.caption(
-        "Phase 1 — Steady-state sizing for precision "
-        "temperature-controlled enclosures."
+    st.markdown("</div>", unsafe_allow_html=True)
+
+    # Display units control group
+    st.markdown('<div class="ctrl-group">', unsafe_allow_html=True)
+    st.markdown('<div class="ctrl-group-label">Display Units</div>', unsafe_allow_html=True)
+    use_imperial = st.toggle("Imperial (ft / CFM / GPM)", value=True)
+    st.markdown("</div>", unsafe_allow_html=True)
+
+    # Status footer
+    st.markdown(
+        '<div class="sidebar-status">'
+        '<div class="sidebar-status-dot"></div>'
+        '<div class="sidebar-status-text">'
+        'Steady-state solver · '
+        '<span class="sidebar-phase-badge">PHASE 1</span>'
+        '<br>100 W laser enclosure sizing'
+        '</div>'
+        '</div>',
+        unsafe_allow_html=True,
     )
-    st.caption("Designed for quantum lab laser systems.")
 
 # ── Three-column layout: inputs | schematic | results ──
 col_inputs, col_schematic, col_results = st.columns([3, 5, 3])
@@ -188,4 +217,5 @@ with col_results:
         heater_required_w=heater_result.heater_required_w,
         coil_leaving_temp_c=coil_result.coil_leaving_temp_c,
         warnings=warnings,
+        solve_mode=solve_mode,
     )

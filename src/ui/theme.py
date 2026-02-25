@@ -91,17 +91,149 @@ CUSTOM_CSS = """
         border-top-color: #F85149;
     }
 
-    /* ── Sidebar styling ───────────────────────────── */
-    section[data-testid="stSidebar"] {
-        background-color: #0D1117;
-        border-right: 1px solid #30363D;
+    /* ── Active/solving metric (orange highlight) ───── */
+    .metric-solving div[data-testid="stMetric"] {
+        border-top: 3px solid #FF6B35 !important;
+        background: #FF6B3508 !important;
+        box-shadow: 0 0 0 1px #FF6B3530, 0 2px 12px #FF6B3518;
     }
-    section[data-testid="stSidebar"] .stSelectbox label,
-    section[data-testid="stSidebar"] .stRadio label {
-        font-size: 0.8rem;
+    .metric-solving div[data-testid="stMetric"] label {
+        color: #FF9A6C !important;
+    }
+    .metric-solving div[data-testid="stMetric"] div[data-testid="stMetricValue"] {
+        color: #FF6B35 !important;
+    }
+
+    /* ── Sidebar redesign ────────────────────────────── */
+    section[data-testid="stSidebar"] {
+        background-color: #080D12;
+        border-right: 1px solid #21262D;
+    }
+    section[data-testid="stSidebar"] > div {
+        padding-top: 1rem !important;
+    }
+
+    /* Sidebar brand header */
+    .sidebar-brand {
+        display: flex;
+        align-items: flex-start;
+        gap: 0.65rem;
+        padding-bottom: 0.9rem;
+        border-bottom: 1px solid #21262D;
+        margin-bottom: 0.9rem;
+    }
+    .sidebar-brand-dot {
+        width: 10px;
+        height: 10px;
+        border-radius: 50%;
+        background: #00D4AA;
+        box-shadow: 0 0 8px #00D4AA88, 0 0 18px #00D4AA44;
+        flex-shrink: 0;
+        margin-top: 3px;
+    }
+    .sidebar-brand-name {
+        font-family: 'DM Sans', sans-serif;
+        font-size: 0.68rem;
+        font-weight: 700;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+        color: #E6EDF3;
+        line-height: 1.3;
+    }
+    .sidebar-brand-tag {
+        display: block;
+        font-family: 'JetBrains Mono', monospace;
+        font-size: 0.55rem;
+        letter-spacing: 0.06em;
+        color: #00D4AA;
+        margin-top: 0.2rem;
+    }
+
+    /* Control group wrapper */
+    .ctrl-group {
+        background: #0D1117;
+        border: 1px solid #21262D;
+        border-radius: 8px;
+        padding: 0.65rem 0.75rem 0.55rem 0.75rem;
+        margin-bottom: 0.6rem;
+    }
+    .ctrl-group-label {
+        font-family: 'DM Sans', sans-serif;
+        font-size: 0.58rem;
+        font-weight: 600;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+        color: #6E7681;
+        margin-bottom: 0.4rem;
+    }
+
+    /* Mode description inside ctrl-group */
+    .mode-desc {
+        display: block;
+        font-family: 'JetBrains Mono', monospace;
+        font-size: 0.62rem;
+        color: #FF6B35;
+        background: #FF6B3514;
+        border: 1px solid #FF6B3540;
+        border-radius: 4px;
+        padding: 0.25rem 0.5rem;
+        margin-top: 0.45rem;
+        line-height: 1.45;
+    }
+
+    /* Sidebar selectbox label */
+    section[data-testid="stSidebar"] .stSelectbox label p {
+        font-size: 0.72rem !important;
         text-transform: uppercase;
         letter-spacing: 0.05em;
+        color: #8B949E !important;
+    }
+
+    /* Sidebar toggle label */
+    section[data-testid="stSidebar"] .stToggle p {
+        font-size: 0.72rem;
         color: #8B949E;
+    }
+
+    /* Sidebar status footer */
+    .sidebar-status {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        border-top: 1px solid #21262D;
+        padding-top: 0.7rem;
+        margin-top: 0.4rem;
+    }
+    .sidebar-status-dot {
+        width: 6px;
+        height: 6px;
+        border-radius: 50%;
+        background: #00D4AA;
+        box-shadow: 0 0 4px #00D4AA88;
+        flex-shrink: 0;
+        animation: pulse 2.5s ease-in-out infinite;
+    }
+    @keyframes pulse {
+        0%, 100% { opacity: 1; box-shadow: 0 0 4px #00D4AA88; }
+        50% { opacity: 0.5; box-shadow: 0 0 2px #00D4AA44; }
+    }
+    .sidebar-status-text {
+        font-family: 'JetBrains Mono', monospace;
+        font-size: 0.58rem;
+        color: #6E7681;
+        line-height: 1.4;
+    }
+    .sidebar-phase-badge {
+        display: inline-block;
+        font-family: 'JetBrains Mono', monospace;
+        font-size: 0.55rem;
+        font-weight: 600;
+        letter-spacing: 0.06em;
+        color: #58A6FF;
+        background: #58A6FF14;
+        border: 1px solid #58A6FF40;
+        border-radius: 3px;
+        padding: 0.1rem 0.35rem;
     }
 
     /* ── Title bar ─────────────────────────────────── */

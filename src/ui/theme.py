@@ -32,13 +32,16 @@ CUSTOM_CSS = """
     div[data-testid="stExpander"] details {
         border: none !important;
     }
-    div[data-testid="stExpander"] summary span {
+    /* Style expander label text — label is rendered as <p> by StreamlitMarkdown.
+       Do NOT target summary span: that would override the Material Symbols font
+       used by the collapse/expand arrow icon, breaking it to display as "arr". */
+    div[data-testid="stExpander"] summary p {
         font-family: 'DM Sans', sans-serif;
         font-weight: 500;
-        text-transform: uppercase;
         letter-spacing: 0.04em;
         font-size: 0.82rem;
         color: #8B949E;
+        margin: 0;
     }
     /* Expander summary row */
     div[data-testid="stExpander"] summary {

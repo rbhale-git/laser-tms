@@ -12,6 +12,7 @@ from src.ui.panel_ambient import render_ambient_panel
 from src.ui.panel_cooling import render_cooling_panel
 from src.ui.panel_results import render_results_panel
 from src.ui.schematic import render_schematic
+from src.ui.physics_card import render_physics_card
 from src.models import (
     Enclosure, HeatLoads, CoolingPlant, AmbientConditions,
     CoolingType, SolveMode,
@@ -162,6 +163,21 @@ with col_schematic:
         ua_value=ambient.ua_value,
     )
     st.plotly_chart(fig, use_container_width=True, theme=None)
+
+    render_physics_card(
+        q_total_w=q_total,
+        delta_t_air_c=cooling.delta_t_air_c,
+        delta_t_water_c=cooling.delta_t_water_c,
+        ua_value=ambient.ua_value,
+        ambient_temp_c=ambient.temperature_c,
+        setpoint_c=ambient.temperature_c,
+        airflow_cfm=cfm,
+        airflow_m3s=air_result.airflow_m3s,
+        coolant_lpm=lpm,
+        coil_leaving_temp_c=coil_result.coil_leaving_temp_c,
+        thermal_capacitance=enclosure.thermal_capacitance,
+        volume_m3=enclosure.volume_m3,
+    )
 
 # ── Right column: results ──────────────────────────────
 with col_results:

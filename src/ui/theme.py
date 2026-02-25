@@ -198,6 +198,133 @@ CUSTOM_CSS = """
         font-size: 0.8rem;
     }
 
+    /* ── Physics reference card ────────────────────── */
+    .physics-card {
+        background: #161B22;
+        border: 1px solid #30363D;
+        border-radius: 8px;
+        padding: 0.8rem 1rem;
+        border-left: 3px solid #30363D;
+    }
+    .physics-title {
+        font-family: 'DM Sans', sans-serif;
+        font-weight: 500;
+        font-size: 0.7rem;
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+        color: #8B949E;
+        margin-bottom: 0.6rem;
+        padding-bottom: 0.3rem;
+        border-bottom: 1px solid #30363D;
+    }
+
+    /* Equation groups */
+    .eq-group {
+        margin-bottom: 0.6rem;
+        padding-bottom: 0.5rem;
+        border-bottom: 1px solid #1C2128;
+    }
+    .eq-group:last-child {
+        margin-bottom: 0;
+        padding-bottom: 0;
+        border-bottom: none;
+    }
+    .eq-label {
+        font-family: 'DM Sans', sans-serif;
+        font-weight: 500;
+        font-size: 0.7rem;
+        color: #58A6FF;
+        letter-spacing: 0.03em;
+        margin-bottom: 0.2rem;
+    }
+    .eq-formula {
+        font-family: 'JetBrains Mono', monospace;
+        font-size: 0.78rem;
+        color: #E6EDF3;
+        padding: 0.25rem 0;
+        line-height: 1.5;
+    }
+    .eq-formula sub {
+        font-size: 0.65rem;
+        color: #8B949E;
+    }
+    .eq-sub {
+        font-family: 'JetBrains Mono', monospace;
+        font-size: 0.7rem;
+        color: #8B949E;
+        padding-left: 0.5rem;
+        line-height: 1.4;
+    }
+    .eq-result {
+        color: #00D4AA;
+        font-weight: 600;
+    }
+    .eq-note {
+        font-family: 'DM Sans', sans-serif;
+        font-size: 0.65rem;
+        color: #6E7681;
+        font-style: italic;
+        margin-top: 0.15rem;
+    }
+
+    /* Variable glossary table */
+    .var-table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 0.2rem;
+    }
+    .var-table tr {
+        border-bottom: 1px solid #1C2128;
+    }
+    .var-table tr:last-child {
+        border-bottom: none;
+    }
+    .var-table td {
+        padding: 0.3rem 0.3rem;
+        vertical-align: middle;
+    }
+    .var-sym {
+        font-family: 'JetBrains Mono', monospace;
+        font-size: 0.75rem;
+        color: #E6EDF3;
+        font-weight: 600;
+        white-space: nowrap;
+        width: 3.5rem;
+    }
+    .var-sym sub {
+        font-size: 0.6rem;
+        color: #8B949E;
+    }
+    .var-desc {
+        font-family: 'DM Sans', sans-serif;
+        font-size: 0.68rem;
+        color: #8B949E;
+    }
+    .var-val {
+        font-family: 'JetBrains Mono', monospace;
+        font-size: 0.72rem;
+        color: #00D4AA;
+        font-weight: 600;
+        white-space: nowrap;
+        text-align: right;
+        width: 5rem;
+    }
+    .var-control {
+        font-family: 'DM Sans', sans-serif;
+        font-size: 0.62rem;
+        font-style: italic;
+        color: #6E7681;
+        padding-left: 0.4rem;
+    }
+    .var-footnote {
+        font-family: 'JetBrains Mono', monospace;
+        font-size: 0.6rem;
+        color: #6E7681;
+        margin-top: 0.5rem;
+        padding-top: 0.4rem;
+        border-top: 1px solid #1C2128;
+    }
+
     /* ── Hide Streamlit branding ───────────────────── */
     #MainMenu {visibility: hidden;}
     footer {visibility: hidden;}

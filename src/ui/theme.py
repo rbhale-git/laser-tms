@@ -37,16 +37,15 @@ CUSTOM_CSS = """
         font-weight: 500;
         text-transform: uppercase;
         letter-spacing: 0.04em;
-        font-size: 0.75rem;
+        font-size: 0.82rem;
         color: #8B949E;
-        white-space: nowrap;
-        overflow: hidden;
-        text-overflow: ellipsis;
     }
-    /* Expander summary row — prevent collapse */
+    /* Expander summary row */
     div[data-testid="stExpander"] summary {
-        min-height: 2rem;
+        min-height: 2.2rem;
         padding: 0.5rem 1rem;
+        display: flex;
+        align-items: center;
     }
     /* Compact expander content padding */
     div[data-testid="stExpander"] div[data-testid="stExpanderDetails"] {
@@ -66,18 +65,18 @@ CUSTOM_CSS = """
         font-weight: 500;
         text-transform: uppercase;
         letter-spacing: 0.05em;
-        font-size: 0.65rem;
+        font-size: 0.75rem;
         color: #8B949E;
     }
     div[data-testid="stMetric"] div[data-testid="stMetricValue"] {
         font-family: 'JetBrains Mono', monospace;
         font-weight: 600;
-        font-size: 1.25rem;
+        font-size: 1.35rem;
         color: #E6EDF3;
     }
     div[data-testid="stMetric"] div[data-testid="stMetricDelta"] {
         font-family: 'JetBrains Mono', monospace;
-        font-size: 0.7rem;
+        font-size: 0.8rem;
         color: #58A6FF;
     }
 
@@ -133,9 +132,9 @@ CUSTOM_CSS = """
     }
     .sidebar-brand-name {
         font-family: 'DM Sans', sans-serif;
-        font-size: 0.68rem;
+        font-size: 0.88rem;
         font-weight: 700;
-        letter-spacing: 0.12em;
+        letter-spacing: 0.1em;
         text-transform: uppercase;
         color: #E6EDF3;
         line-height: 1.3;
@@ -143,7 +142,7 @@ CUSTOM_CSS = """
     .sidebar-brand-tag {
         display: block;
         font-family: 'JetBrains Mono', monospace;
-        font-size: 0.55rem;
+        font-size: 0.72rem;
         letter-spacing: 0.06em;
         color: #00D4AA;
         margin-top: 0.2rem;
@@ -159,9 +158,9 @@ CUSTOM_CSS = """
     }
     .ctrl-group-label {
         font-family: 'DM Sans', sans-serif;
-        font-size: 0.58rem;
+        font-size: 0.75rem;
         font-weight: 600;
-        letter-spacing: 0.12em;
+        letter-spacing: 0.1em;
         text-transform: uppercase;
         color: #6E7681;
         margin-bottom: 0.4rem;
@@ -171,19 +170,19 @@ CUSTOM_CSS = """
     .mode-desc {
         display: block;
         font-family: 'JetBrains Mono', monospace;
-        font-size: 0.62rem;
+        font-size: 0.8rem;
         color: #FF6B35;
         background: #FF6B3514;
         border: 1px solid #FF6B3540;
         border-radius: 4px;
-        padding: 0.25rem 0.5rem;
+        padding: 0.3rem 0.6rem;
         margin-top: 0.45rem;
-        line-height: 1.45;
+        line-height: 1.5;
     }
 
     /* Sidebar selectbox label */
     section[data-testid="stSidebar"] .stSelectbox label p {
-        font-size: 0.72rem !important;
+        font-size: 0.9rem !important;
         text-transform: uppercase;
         letter-spacing: 0.05em;
         color: #8B949E !important;
@@ -191,7 +190,7 @@ CUSTOM_CSS = """
 
     /* Sidebar toggle label */
     section[data-testid="stSidebar"] .stToggle p {
-        font-size: 0.72rem;
+        font-size: 0.9rem;
         color: #8B949E;
     }
 
@@ -219,14 +218,14 @@ CUSTOM_CSS = """
     }
     .sidebar-status-text {
         font-family: 'JetBrains Mono', monospace;
-        font-size: 0.58rem;
+        font-size: 0.75rem;
         color: #6E7681;
-        line-height: 1.4;
+        line-height: 1.5;
     }
     .sidebar-phase-badge {
         display: inline-block;
         font-family: 'JetBrains Mono', monospace;
-        font-size: 0.55rem;
+        font-size: 0.7rem;
         font-weight: 600;
         letter-spacing: 0.06em;
         color: #58A6FF;
@@ -264,9 +263,9 @@ CUSTOM_CSS = """
     /* ── Section headers ───────────────────────────── */
     .section-header {
         font-family: 'DM Sans', sans-serif;
-        font-weight: 500;
-        font-size: 0.75rem;
-        letter-spacing: 0.1em;
+        font-weight: 600;
+        font-size: 0.85rem;
+        letter-spacing: 0.08em;
         text-transform: uppercase;
         color: #8B949E;
         border-bottom: 1px solid #30363D;
@@ -278,7 +277,7 @@ CUSTOM_CSS = """
     /* ── Number inputs (JetBrains Mono) ────────────── */
     input[type="number"], div[data-testid="stNumberInput"] input {
         font-family: 'JetBrains Mono', monospace;
-        font-size: 0.85rem;
+        font-size: 0.95rem;
     }
 
     /* ── Disabled inputs visual feedback ───────────── */
@@ -325,9 +324,9 @@ CUSTOM_CSS = """
         transition: width 0.3s ease;
     }
 
-    /* ── Compact number input labels ───────────────── */
+    /* ── Number input labels ────────────────────────── */
     div[data-testid="stNumberInput"] label p {
-        font-size: 0.8rem;
+        font-size: 0.88rem;
     }
 
     /* ── Physics reference card ────────────────────── */

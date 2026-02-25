@@ -27,6 +27,7 @@ from src.constants import AIR_CP, AIR_DENSITY
 st.set_page_config(
     page_title="Quantum Enclosure Thermal Analyzer",
     layout="wide",
+    initial_sidebar_state="expanded",
 )
 inject_theme()
 
@@ -38,20 +39,37 @@ st.markdown(
 
 # ── Sidebar: solve mode + unit toggle ──────────────────
 with st.sidebar:
-    st.markdown("### CONFIGURATION")
+    st.markdown(
+        '<div class="section-header">SOLVE CONFIGURATION</div>',
+        unsafe_allow_html=True,
+    )
     solve_mode = st.selectbox(
         "Solve mode",
         options=[sm for sm in SolveMode],
         format_func=lambda sm: sm.value,
     )
+    st.markdown("")  # spacer
     use_imperial = st.toggle("Imperial units", value=True)
+
     st.markdown("---")
-    st.caption("Phase 1 — Steady-State Sizing")
+    st.markdown(
+        '<div class="section-header">ABOUT</div>',
+        unsafe_allow_html=True,
+    )
+    st.caption(
+        "Phase 1 — Steady-state sizing for precision "
+        "temperature-controlled enclosures."
+    )
+    st.caption("Designed for quantum lab laser systems.")
 
-# ── Input panels (left column) ─────────────────────────
-left_col, right_col = st.columns([1, 2])
+# ── Three-column layout: inputs | schematic | results ──
+col_inputs, col_schematic, col_results = st.columns([3, 5, 3])
 
-with left_col:
+with col_inputs:
+    st.markdown(
+        '<div class="section-header">SYSTEM PARAMETERS</div>',
+        unsafe_allow_html=True,
+    )
     geo = render_geometry_panel(use_imperial)
     loads_input = render_loads_panel()
     ambient_input = render_ambient_panel()
@@ -95,24 +113,20 @@ cooling = CoolingPlant(
 # ── Run solvers ────────────────────────────────────────
 q_total = loads.total_load_w
 
-# Airflow
 air_result = solve_airflow(
     q_total_w=q_total, delta_t_air_c=cooling.delta_t_air_c,
 )
 
-# Coolant
 coolant_result = solve_coolant_flow(
     q_total_w=q_total, delta_t_water_c=cooling.delta_t_water_c,
 )
 
-# Coil leaving temp
 coil_result = solve_coil_leaving_temp(
     q_total_w=q_total,
     airflow_kgs=air_result.airflow_kgs,
     return_air_temp_c=ambient.temperature_c,
 )
 
-# Heater requirement
 heater_result = solve_heater_requirement(
     q_load_w=q_total,
     ua_value=ambient.ua_value,
@@ -120,17 +134,19 @@ heater_result = solve_heater_requirement(
     setpoint_c=ambient.temperature_c,
 )
 
-# Coil utilization
 coil_utilization = (q_total / cooling.coil_max_capacity_w) * 100.0
 
-# Warnings
 warnings = compute_warnings(
     coil_utilization_pct=coil_utilization,
     heater_required_w=heater_result.heater_required_w,
 )
 
-# ── Right column: schematic + results ──────────────────
-with right_col:
+# ── Center column: system schematic ────────────────────
+with col_schematic:
+    st.markdown(
+        '<div class="section-header">SYSTEM SCHEMATIC</div>',
+        unsafe_allow_html=True,
+    )
     cfm = m3s_to_cfm(air_result.airflow_m3s)
     lpm = kgs_to_lpm(coolant_result.coolant_kgs)
 
@@ -147,6 +163,8 @@ with right_col:
     )
     st.plotly_chart(fig, use_container_width=True, theme=None)
 
+# ── Right column: results ──────────────────────────────
+with col_results:
     render_results_panel(
         airflow_m3s=air_result.airflow_m3s,
         coolant_kgs=coolant_result.coolant_kgs,

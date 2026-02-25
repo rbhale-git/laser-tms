@@ -17,10 +17,9 @@ CUSTOM_CSS = """
         font-family: 'DM Sans', sans-serif;
     }
 
-    /* Tighten default Streamlit block spacing */
-    div[data-testid="stVerticalBlock"] > div {
-        padding-top: 0;
-        padding-bottom: 0;
+    /* Tighten block spacing only outside expanders */
+    div[data-testid="stVerticalBlock"] > div[data-testid="stVerticalBlockBorderWrapper"] {
+        margin-bottom: -0.25rem;
     }
 
     /* ── Panel containers ──────────────────────────── */
@@ -37,9 +36,17 @@ CUSTOM_CSS = """
         font-family: 'DM Sans', sans-serif;
         font-weight: 500;
         text-transform: uppercase;
-        letter-spacing: 0.08em;
-        font-size: 0.8rem;
+        letter-spacing: 0.04em;
+        font-size: 0.75rem;
         color: #8B949E;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+    /* Expander summary row — prevent collapse */
+    div[data-testid="stExpander"] summary {
+        min-height: 2rem;
+        padding: 0.5rem 1rem;
     }
     /* Compact expander content padding */
     div[data-testid="stExpander"] div[data-testid="stExpanderDetails"] {

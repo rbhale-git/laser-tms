@@ -399,6 +399,27 @@ CUSTOM_CSS = """
         margin-top: 0.15rem;
     }
 
+    /* Equation assumptions appendix */
+    .eq-assume {
+        font-family: 'DM Sans', sans-serif;
+        font-size: 0.61rem;
+        color: #484F58;
+        border-top: 1px dashed #21262D;
+        margin-top: 0.35rem;
+        padding-top: 0.3rem;
+        line-height: 1.55;
+    }
+    .eq-assume-title {
+        font-family: 'DM Sans', sans-serif;
+        font-size: 0.56rem;
+        font-weight: 700;
+        letter-spacing: 0.09em;
+        text-transform: uppercase;
+        color: #3D444D;
+        display: block;
+        margin-bottom: 0.1rem;
+    }
+
     /* Variable glossary table */
     .var-table {
         width: 100%;

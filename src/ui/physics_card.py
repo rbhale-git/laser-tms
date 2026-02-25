@@ -20,14 +20,14 @@ def render_physics_card(
     thermal_capacitance: float,
     volume_m3: float,
 ) -> None:
-    """Render the physics breakdown card with live values."""
+    """Render the physics breakdown card with live values and assumptions."""
 
     # ── Governing equations section ────────────────────
     st.markdown(
         '<div class="physics-card">'
         '<div class="physics-title">GOVERNING EQUATIONS</div>'
-        #
-        # Energy balance
+
+        # ── Energy balance ──────────────────────────────
         '<div class="eq-group">'
         '<div class="eq-label">Single-Node Energy Balance</div>'
         '<div class="eq-formula">'
@@ -40,9 +40,17 @@ def render_physics_card(
         f'C<sub>e</sub> = {thermal_capacitance / 1000:.1f} kJ/K &nbsp;|&nbsp; '
         f'At steady state, dT<sub>e</sub>/dt = 0'
         f'</div>'
+        '<div class="eq-assume">'
+        '<span class="eq-assume-title">Assumes</span>'
+        'Lumped capacitance — interior is spatially isothermal (no gradients) &middot; '
+        'Heat loads uniformly distributed &middot; '
+        'UA constant (independent of &Delta;T and flow velocity) &middot; '
+        'Radiation negligible or linearised into UA &middot; '
+        'Air well-mixed throughout enclosure volume'
         '</div>'
-        #
-        # Airflow sizing
+        '</div>'
+
+        # ── Airflow sizing ──────────────────────────────
         '<div class="eq-group">'
         '<div class="eq-label">Required Airflow</div>'
         '<div class="eq-formula">'
@@ -53,9 +61,17 @@ def render_physics_card(
         f' &rarr; <span class="eq-result">{airflow_cfm:.1f} CFM</span>'
         f' ({airflow_m3s:.4f} m&sup3;/s)'
         f'</div>'
+        '<div class="eq-assume">'
+        '<span class="eq-assume-title">Assumes</span>'
+        'Constant air properties (c<sub>p</sub> = 1005 J/kg&middot;K at standard lab conditions) &middot; '
+        'Sensible heat only — no moisture condensation or latent load &middot; '
+        'All heat load removed by airflow (no direct conduction bypass) &middot; '
+        'Uniform temperature across supply and return cross-sections &middot; '
+        'Incompressible, steady flow'
         '</div>'
-        #
-        # Coolant sizing
+        '</div>'
+
+        # ── Coolant sizing ──────────────────────────────
         '<div class="eq-group">'
         '<div class="eq-label">Required Coolant Flow</div>'
         '<div class="eq-formula">'
@@ -65,9 +81,17 @@ def render_physics_card(
         f'= {q_total_w:.0f} / (4186 &middot; {delta_t_water_c:.1f})'
         f' &rarr; <span class="eq-result">{coolant_lpm:.2f} L/min</span>'
         f'</div>'
+        '<div class="eq-assume">'
+        '<span class="eq-assume-title">Assumes</span>'
+        'Single-phase liquid — no boiling or phase change &middot; '
+        'Constant c<sub>p,w</sub> = 4186 J/kg&middot;K (pure water; antifreeze additives will alter this) &middot; '
+        'All enclosure heat rejected to coolant (no thermal bypass around coil) &middot; '
+        'Coolant inlet temperature equals chilled water supply setpoint &middot; '
+        'Pump heat addition negligible'
         '</div>'
-        #
-        # Coil leaving temp
+        '</div>'
+
+        # ── Coil leaving temp ───────────────────────────
         '<div class="eq-group">'
         '<div class="eq-label">Coil Leaving Air Temperature</div>'
         '<div class="eq-formula">'
@@ -78,9 +102,17 @@ def render_physics_card(
         f'= {ambient_temp_c:.1f} &minus; {delta_t_air_c:.1f}'
         f' = <span class="eq-result">{coil_leaving_temp_c:.1f} &deg;C</span>'
         f'</div>'
+        '<div class="eq-assume">'
+        '<span class="eq-assume-title">Assumes</span>'
+        'Return air temperature equals enclosure setpoint (well-mixed interior) &middot; '
+        'Sensible cooling only — no latent load at the coil &middot; '
+        'Negligible duct heat gain between coil and enclosure inlet &middot; '
+        'Coil approach temperature constraint is not binding (coil not saturated) &middot; '
+        'Coil effectiveness sufficient to deliver the computed leaving temperature'
         '</div>'
-        #
-        # Ambient coupling
+        '</div>'
+
+        # ── Ambient coupling ────────────────────────────
         '<div class="eq-group">'
         '<div class="eq-label">Ambient Heat Transfer</div>'
         '<div class="eq-formula">'
@@ -90,7 +122,16 @@ def render_physics_card(
         f'UA = {ua_value:.1f} W/K &nbsp;|&nbsp; '
         f'Includes conduction + infiltration'
         f'</div>'
+        '<div class="eq-assume">'
+        '<span class="eq-assume-title">Assumes</span>'
+        'Linear (Newtonian) heat transfer — UA independent of temperature difference &middot; '
+        'Ambient temperature is spatially uniform around all enclosure surfaces &middot; '
+        'UA is time-invariant (no insulation degradation, no exterior airflow variation) &middot; '
+        'Air infiltration heat gain included in UA via the ACH input path &middot; '
+        'Radiation treated as linearised and absorbed into the effective UA'
         '</div>'
+        '</div>'
+
         '</div>',
         unsafe_allow_html=True,
     )

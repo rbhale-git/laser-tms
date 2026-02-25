@@ -34,7 +34,7 @@ inject_theme()
 
 # ── Title ──────────────────────────────────────────────
 st.markdown(
-    '<div class="main-title">QUANTUM ENCLOSURE THERMAL ANALYZER</div>',
+    '<div class="main-title">LASER ENCLOSURE THERMAL MODEL</div>',
     unsafe_allow_html=True,
 )
 

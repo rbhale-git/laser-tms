@@ -1,10 +1,10 @@
-# Quantum Enclosure Thermal Analyzer
+# Laser Enclosure Thermal Modelling Tool
 
-Steady-state thermal sizing tool for precision temperature-controlled enclosures used in quantum computing laser systems. Built with Streamlit and designed for lab engineers who need to quickly size airflow, coolant flow, and heat exchanger capacity for enclosures that must hold tight temperature tolerances.
+Steady-state thermal modelling tool for precision temperature-controlled laser enclosures. Built with Streamlit and designed for lab engineers who need to quickly size airflow, coolant flow, and heat exchanger capacity for enclosures that must hold tight temperature tolerances.
 
 ## Problem Statement
 
-Quantum computing laser systems generate continuous heat loads (~100 W typical) inside sealed enclosures that must maintain temperature stability within +-0.1 degC. Engineers need to answer:
+Laser systems generate continuous heat loads (~100 W typical) inside sealed enclosures that must maintain temperature stability within +-0.1 degC. Engineers need to answer:
 
 - **How much airflow** is required to remove the heat load for a given air-side delta-T?
 - **How much coolant flow** does the chilled water coil need?

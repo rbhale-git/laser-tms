@@ -373,21 +373,21 @@ CUSTOM_CSS = """
     }
     .eq-formula {
         font-family: 'JetBrains Mono', monospace;
-        font-size: 0.78rem;
+        font-size: 0.95rem;
         color: #E6EDF3;
         padding: 0.25rem 0;
-        line-height: 1.5;
+        line-height: 1.6;
     }
     .eq-formula sub {
-        font-size: 0.65rem;
+        font-size: 0.75rem;
         color: #8B949E;
     }
     .eq-sub {
         font-family: 'JetBrains Mono', monospace;
-        font-size: 0.7rem;
+        font-size: 0.82rem;
         color: #8B949E;
         padding-left: 0.5rem;
-        line-height: 1.4;
+        line-height: 1.5;
     }
     .eq-result {
         color: #00D4AA;
@@ -404,22 +404,22 @@ CUSTOM_CSS = """
     /* Equation assumptions appendix */
     .eq-assume {
         font-family: 'DM Sans', sans-serif;
-        font-size: 0.61rem;
-        color: #484F58;
-        border-top: 1px dashed #21262D;
+        font-size: 0.68rem;
+        color: #6E7681;
+        border-top: 1px dashed #30363D;
         margin-top: 0.35rem;
         padding-top: 0.3rem;
-        line-height: 1.55;
+        line-height: 1.6;
     }
     .eq-assume-title {
         font-family: 'DM Sans', sans-serif;
-        font-size: 0.56rem;
+        font-size: 0.62rem;
         font-weight: 700;
         letter-spacing: 0.09em;
         text-transform: uppercase;
-        color: #3D444D;
+        color: #58A6FF;
         display: block;
-        margin-bottom: 0.1rem;
+        margin-bottom: 0.15rem;
     }
 
     /* Variable glossary table */

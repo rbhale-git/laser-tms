@@ -125,9 +125,9 @@ if ambient_input.get("ua_mode") == "Air changes per hour (ACH)":
     ua_value = ach * enclosure.volume_m3 * AIR_DENSITY * AIR_CP / 3600.0
 
 ambient = AmbientConditions(
-    temperature_c=ambient_input["temperature_c"],
-    variation_amplitude_c=ambient_input["variation_amplitude_c"],
-    variation_period_hr=ambient_input["variation_period_hr"],
+    T_ambient_c=ambient_input["T_ambient_c"],
+    T_setpoint_c=ambient_input["T_setpoint_c"],
+    T_ambient_variation_c=ambient_input["T_ambient_variation_c"],
     ua_value=ua_value,
 )
 
@@ -154,14 +154,14 @@ coolant_result = solve_coolant_flow(
 coil_result = solve_coil_leaving_temp(
     q_total_w=q_total,
     airflow_kgs=air_result.airflow_kgs,
-    return_air_temp_c=ambient.temperature_c,
+    return_air_temp_c=ambient.T_setpoint_c,
 )
 
 heater_result = solve_heater_requirement(
     q_load_w=q_total,
     ua_value=ambient.ua_value,
-    ambient_temp_c=ambient.temperature_c,
-    setpoint_c=ambient.temperature_c,
+    ambient_temp_c=ambient.T_ambient_low,
+    setpoint_c=ambient.T_setpoint_c,
 )
 
 coil_utilization = (q_total / cooling.coil_max_capacity_w) * 100.0
@@ -181,10 +181,10 @@ with col_schematic:
     lpm = kgs_to_lpm(coolant_result.coolant_kgs)
 
     fig = render_schematic(
-        enclosure_temp_c=ambient.temperature_c,
+        enclosure_temp_c=ambient.T_setpoint_c,
         supply_temp_c=coil_result.coil_leaving_temp_c,
-        return_temp_c=ambient.temperature_c,
-        ambient_temp_c=ambient.temperature_c,
+        return_temp_c=ambient.T_setpoint_c,
+        ambient_temp_c=ambient.T_ambient_c,
         chilled_water_temp_c=cooling.chilled_water_temp_c,
         airflow_cfm=cfm,
         coolant_lpm=lpm,
@@ -198,8 +198,8 @@ with col_schematic:
         delta_t_air_c=cooling.delta_t_air_c,
         delta_t_water_c=cooling.delta_t_water_c,
         ua_value=ambient.ua_value,
-        ambient_temp_c=ambient.temperature_c,
-        setpoint_c=ambient.temperature_c,
+        ambient_temp_c=ambient.T_ambient_c,
+        setpoint_c=ambient.T_setpoint_c,
         airflow_cfm=cfm,
         airflow_m3s=air_result.airflow_m3s,
         coolant_lpm=lpm,

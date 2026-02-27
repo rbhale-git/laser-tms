@@ -82,6 +82,17 @@ def render_ambient_panel() -> dict:
                 step=0.5,
                 help="Conduction + infiltration coupling to ambient",
             )
+            st.markdown(
+                '<span class="eq-assume" style="font-size:0.78em">'
+                "Overall heat transfer coefficient between the enclosure "
+                "and the lab. Combines conduction through walls, seals, "
+                "and air infiltration into a single number. "
+                "A higher UA means the enclosure is more thermally coupled "
+                "to the room — harder to hold setpoint when ambient drifts. "
+                "Typical range: 1\u20135 W/K for a well-insulated enclosure."
+                "</span>",
+                unsafe_allow_html=True,
+            )
         else:
             ach = st.number_input(
                 "Air changes per hour",
@@ -89,6 +100,16 @@ def render_ambient_panel() -> dict:
                 min_value=0.0,
                 step=0.1,
                 help="Infiltration rate; converted to UA internally",
+            )
+            st.markdown(
+                '<span class="eq-assume" style="font-size:0.78em">'
+                "How many times per hour the enclosure air volume is "
+                "replaced by outside lab air through leaks, seals, and "
+                "cable pass-throughs. Converted to an equivalent UA value "
+                "using the enclosure volume. "
+                "Typical range: 0.1\u20131.0 ACH for a sealed enclosure."
+                "</span>",
+                unsafe_allow_html=True,
             )
             st.caption("Note: UA computed using enclosure volume from Panel 1")
             ua = ach  # Will be converted in app.py using actual volume

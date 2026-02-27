@@ -55,17 +55,22 @@ def render_schematic(
         showarrow=False,
     )
     fig.add_annotation(
-        x=3.0, y=5.8, text=f"T = {enclosure_temp_c:.1f} °C",
+        x=3.0, y=5.8, text=f"T<sub>set</sub> = {enclosure_temp_c:.1f} °C",
         font=dict(color=TEAL, size=17, family="JetBrains Mono"),
         showarrow=False,
     )
     fig.add_annotation(
-        x=3.0, y=4.55, text=f"Q<sub>load</sub> = {heat_load_w:.0f} W",
+        x=3.0, y=5.05, text="(regulated)",
+        font=dict(color=MUTED, size=10, family="DM Sans"),
+        showarrow=False,
+    )
+    fig.add_annotation(
+        x=3.0, y=4.2, text=f"Q<sub>load</sub> = {heat_load_w:.0f} W",
         font=dict(color=AMBER, size=13, family="JetBrains Mono"),
         showarrow=False,
     )
     fig.add_annotation(
-        x=3.0, y=3.45, text=f"UA = {ua_value:.1f} W/K",
+        x=3.0, y=3.3, text=f"UA = {ua_value:.1f} W/K",
         font=dict(color=MUTED, size=11, family="JetBrains Mono"),
         showarrow=False,
     )
@@ -129,8 +134,14 @@ def render_schematic(
     )
     fig.add_annotation(
         x=3.0, y=9.45,
-        text=f"Ambient  {ambient_temp_c:.1f} °C",
+        text=f"T<sub>amb</sub> = {ambient_temp_c:.1f} °C",
         font=dict(color=MUTED, size=12, family="JetBrains Mono"),
+        showarrow=False,
+    )
+    fig.add_annotation(
+        x=3.0, y=9.0,
+        text="(unregulated)",
+        font=dict(color=MUTED, size=9, family="DM Sans"),
         showarrow=False,
     )
 

@@ -1,14 +1,35 @@
-"""Panel 3: Ambient temperature and coupling inputs."""
+"""Panel 3: Enclosure setpoint and ambient environment inputs."""
 import streamlit as st
 
 
 def render_ambient_panel() -> dict:
-    """Render ambient condition inputs and return values in SI.
+    """Render setpoint and ambient inputs, return values in SI.
 
-    Returns dict with keys: temperature_c, variation_amplitude_c,
-    variation_period_hr, ua_value.
+    Returns dict with keys: T_setpoint_c, T_ambient_c, T_ambient_variation_c,
+    ua_value, ua_mode.
     """
-    with st.expander("AMBIENT CONDITIONS", expanded=True):
+    # ── Group 1: Enclosure Setpoint (Regulated) ──────────
+    with st.expander("ENCLOSURE SETPOINT", expanded=True):
+        setpoint = st.number_input(
+            "Setpoint temperature (°C)",
+            value=23.0,
+            min_value=10.0,
+            max_value=40.0,
+            step=0.5,
+        )
+        setpoint_f = setpoint * 9.0 / 5.0 + 32.0
+        st.caption(f"{setpoint_f:.1f} °F")
+        st.markdown(
+            '<span class="eq-assume" style="font-size:0.78em">'
+            "The temperature the cooling system actively maintains "
+            "inside the enclosure (\u00b10.1 \u00b0C). Set this to match the "
+            "average ambient so opening the lid causes minimal disturbance."
+            "</span>",
+            unsafe_allow_html=True,
+        )
+
+    # ── Group 2: Ambient Environment (Unregulated) ───────
+    with st.expander("AMBIENT ENVIRONMENT", expanded=True):
         c1, c2 = st.columns(2)
         with c1:
             temp = st.number_input(
@@ -21,13 +42,32 @@ def render_ambient_panel() -> dict:
         with c2:
             variation = st.number_input(
                 "Variation amplitude (±°C)",
-                value=2.0,
+                value=2.5,
                 min_value=0.0,
                 max_value=10.0,
                 step=0.5,
                 help="Peak amplitude of ambient temperature swing",
             )
 
+        t_low = temp - variation
+        t_high = temp + variation
+        t_low_f = t_low * 9.0 / 5.0 + 32.0
+        t_high_f = t_high * 9.0 / 5.0 + 32.0
+        temp_f = temp * 9.0 / 5.0 + 32.0
+        st.caption(f"{temp_f:.1f} °F")
+        st.markdown(
+            f"**Ambient range:** {t_low:.1f} °C to {t_high:.1f} °C "
+            f"({t_low_f:.1f} °F to {t_high_f:.1f} °F)"
+        )
+        st.markdown(
+            '<span class="eq-assume" style="font-size:0.78em">'
+            "The surrounding lab temperature. This is a disturbance the "
+            "system must counteract — it is not controlled."
+            "</span>",
+            unsafe_allow_html=True,
+        )
+
+        # ── UA coupling input ────────────────────────────
         ua_mode = st.radio(
             "Ambient coupling input mode",
             ["Direct UA (W/K)", "Air changes per hour (ACH)"],
@@ -54,9 +94,9 @@ def render_ambient_panel() -> dict:
             ua = ach  # Will be converted in app.py using actual volume
 
     return {
-        "temperature_c": temp,
-        "variation_amplitude_c": variation,
-        "variation_period_hr": 24.0,
+        "T_setpoint_c": setpoint,
+        "T_ambient_c": temp,
+        "T_ambient_variation_c": variation,
         "ua_value": ua,
         "ua_mode": ua_mode,
     }

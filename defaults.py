@@ -41,8 +41,8 @@ def default_cooling_plant() -> CoolingPlant:
 
 def default_ambient() -> AmbientConditions:
     return AmbientConditions(
-        temperature_c=23.5,
-        variation_amplitude_c=2.0,
-        variation_period_hr=24.0,
+        T_ambient_c=23.5,
+        T_setpoint_c=23.0,
+        T_ambient_variation_c=2.5,
         ua_value=2.0,
     )

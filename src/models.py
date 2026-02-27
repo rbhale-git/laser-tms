@@ -66,7 +66,17 @@ class CoolingPlant:
 
 @dataclass
 class AmbientConditions:
-    temperature_c: float = 23.5
-    variation_amplitude_c: float = 2.0
-    variation_period_hr: float = 24.0
+    T_ambient_c: float = 23.5
+    T_setpoint_c: float = 23.0
+    T_ambient_variation_c: float = 2.5
     ua_value: float = 2.0  # W/K
+
+    @property
+    def T_ambient_low(self) -> float:
+        """Worst-case cold ambient (T_ambient - variation)."""
+        return self.T_ambient_c - self.T_ambient_variation_c
+
+    @property
+    def T_ambient_high(self) -> float:
+        """Worst-case hot ambient (T_ambient + variation)."""
+        return self.T_ambient_c + self.T_ambient_variation_c

@@ -10,7 +10,6 @@ from src.models import (
     HeatLoads,
     CoolingPlant,
     AmbientConditions,
-    CoolingType,
 )
 from src.units import ft_to_m
 
@@ -30,7 +29,6 @@ def default_heat_loads() -> HeatLoads:
 
 def default_cooling_plant() -> CoolingPlant:
     return CoolingPlant(
-        cooling_type=CoolingType.AIR_COIL,
         coil_approach_temp_c=2.0,
         coil_max_capacity_w=500.0,
         chilled_water_temp_c=15.0,

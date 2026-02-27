@@ -9,11 +9,6 @@ from enum import Enum
 from src.constants import AIR_CP, AIR_DENSITY
 
 
-class CoolingType(Enum):
-    AIR_COIL = "air_coil"
-    LIQUID = "liquid"
-    HYBRID = "hybrid"
-
 
 class SolveMode(Enum):
     AIRFLOW = "Solve airflow given Q and ΔT_air"
@@ -56,7 +51,6 @@ class HeatLoads:
 
 @dataclass
 class CoolingPlant:
-    cooling_type: CoolingType = CoolingType.AIR_COIL
     coil_approach_temp_c: float = 2.0
     coil_max_capacity_w: float = 500.0
     chilled_water_temp_c: float = 15.0

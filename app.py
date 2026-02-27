@@ -15,7 +15,7 @@ from src.ui.schematic import render_schematic
 from src.ui.physics_card import render_physics_card
 from src.models import (
     Enclosure, HeatLoads, CoolingPlant, AmbientConditions,
-    CoolingType, SolveMode,
+    SolveMode,
 )
 from src.solvers import (
     solve_airflow, solve_coolant_flow,
@@ -132,7 +132,6 @@ ambient = AmbientConditions(
 )
 
 cooling = CoolingPlant(
-    cooling_type=CoolingType(cooling_input["cooling_type"]),
     coil_approach_temp_c=cooling_input["coil_approach_temp_c"],
     coil_max_capacity_w=cooling_input["coil_max_capacity_w"],
     chilled_water_temp_c=cooling_input["chilled_water_temp_c"],

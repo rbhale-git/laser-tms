@@ -42,7 +42,7 @@ def render_ambient_panel() -> dict:
         with c2:
             variation = st.number_input(
                 "Variation amplitude (±°C)",
-                value=2.5,
+                value=5.5,
                 min_value=0.0,
                 max_value=10.0,
                 step=0.5,

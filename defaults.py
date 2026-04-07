@@ -41,6 +41,6 @@ def default_ambient() -> AmbientConditions:
     return AmbientConditions(
         T_ambient_c=23.5,
         T_setpoint_c=23.0,
-        T_ambient_variation_c=2.5,
+        T_ambient_variation_c=5.5,
         ua_value=2.0,
     )

@@ -62,7 +62,7 @@ class CoolingPlant:
 class AmbientConditions:
     T_ambient_c: float = 23.5
     T_setpoint_c: float = 23.0
-    T_ambient_variation_c: float = 2.5
+    T_ambient_variation_c: float = 5.5
     ua_value: float = 2.0  # W/K
 
     @property

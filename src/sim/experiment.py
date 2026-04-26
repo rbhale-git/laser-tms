@@ -220,3 +220,78 @@ def run_experiment(
         v_dot_actual_m3s=out_v_actual,
         saturated=out_saturated,
     )
+
+
+from src.units import m3s_to_cfm
+
+
+def compute_summary(result: SimulationResult) -> dict[str, float]:
+    """Returns peak/mean/RMS/min CFM, max excursion, settling time, saturation %.
+
+    settling_time_s is the earliest time t* such that
+    |T_inside(t) - T_setpoint| <= 0.5 °C for ALL t in [t*, end].
+    Returns np.inf if no such t* exists.
+    """
+    cfm_command = np.array([m3s_to_cfm(v) for v in result.v_dot_command_m3s])
+    excursion = np.abs(result.t_inside_c - result.t_setpoint_c)
+
+    # Settling time: walk backwards to find the latest time the trace was
+    # OUT of the band. The earliest settling time is the next sample after that.
+    band = 0.5
+    out_of_band = excursion > band
+    if not np.any(out_of_band):
+        settling_time_s = 0.0
+    elif np.all(out_of_band):
+        settling_time_s = float("inf")
+    else:
+        # Index of the last out-of-band sample
+        last_bad = int(np.max(np.where(out_of_band)))
+        if last_bad == len(result.t_s) - 1:
+            settling_time_s = float("inf")
+        else:
+            settling_time_s = float(result.t_s[last_bad + 1])
+
+    return {
+        "peak_cfm": float(np.max(cfm_command)),
+        "mean_cfm": float(np.mean(cfm_command)),
+        "rms_cfm": float(np.sqrt(np.mean(cfm_command ** 2))),
+        "min_commanded_cfm": float(np.min(cfm_command)),
+        "max_excursion_c": float(np.max(excursion)),
+        "settling_time_s": settling_time_s,
+        "saturation_pct": float(100.0 * np.mean(result.saturated)),
+    }
+
+
+def compute_experiment_warnings(result: SimulationResult) -> list[str]:
+    """Return human-readable warnings about a completed run.
+
+    Warnings are NOT errors — the run produced a result. They flag suspicious
+    or infeasible operating points to the user.
+    """
+    warnings: list[str] = []
+    summary = compute_summary(result)
+
+    if summary["saturation_pct"] > 50.0:
+        warnings.append(
+            f"Loop saturated {summary['saturation_pct']:.0f}% of run. "
+            "Fan range is undersized for this scenario."
+        )
+    if summary["max_excursion_c"] > 1.0:
+        warnings.append(
+            f"Peak excursion from setpoint reached "
+            f"{summary['max_excursion_c']:.2f} °C — controller cannot keep up."
+        )
+    if summary["settling_time_s"] == float("inf"):
+        warnings.append("Loop never settled within ±0.5 °C of setpoint.")
+    if (result.q_cool_w < 0).mean() > 0.05:
+        n_negative = int((result.q_cool_w < 0).sum())
+        warnings.append(
+            f"Cooling power went negative for {n_negative} samples — "
+            "supply air heated the enclosure. Check T_supply vs. T_inside."
+        )
+    if np.any(np.isnan(result.t_inside_c)):
+        warnings.append(
+            "Numerical instability: NaN in temperature trace. "
+            "Reduce timestep or check inputs."
+        )
+    return warnings

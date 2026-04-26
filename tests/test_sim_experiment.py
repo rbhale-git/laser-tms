@@ -199,3 +199,100 @@ class TestRunExperiment:
         assert len(result.v_dot_command_m3s) == n
         assert len(result.v_dot_actual_m3s) == n
         assert len(result.saturated) == n
+
+
+class TestComputeSummary:
+    def _flat_result(self, t_inside_value: float = 23.0,
+                     v_command_value: float = 0.04) -> SimulationResult:
+        """Build a fake SimulationResult representing a perfectly steady run."""
+        n = 100
+        return SimulationResult(
+            t_s=np.linspace(0.0, 100.0, n),
+            t_inside_c=np.full(n, t_inside_value),
+            t_setpoint_c=np.full(n, 23.0),
+            t_amb_c=np.full(n, 23.0),
+            q_load_w=np.full(n, 100.0),
+            q_cool_w=np.full(n, 100.0),
+            v_dot_command_m3s=np.full(n, v_command_value),
+            v_dot_actual_m3s=np.full(n, v_command_value),
+            saturated=np.zeros(n, dtype=bool),
+        )
+
+    def test_returns_expected_keys(self):
+        from src.sim.experiment import compute_summary
+        summary = compute_summary(self._flat_result())
+        assert set(summary.keys()) == {
+            "peak_cfm", "mean_cfm", "rms_cfm", "min_commanded_cfm",
+            "max_excursion_c", "settling_time_s", "saturation_pct",
+        }
+
+    def test_peak_matches_max_command(self):
+        from src.sim.experiment import compute_summary
+        from src.units import m3s_to_cfm
+        n = 50
+        commands = np.linspace(0.02, 0.08, n)
+        r = SimulationResult(
+            t_s=np.arange(n, dtype=float),
+            t_inside_c=np.full(n, 23.0),
+            t_setpoint_c=np.full(n, 23.0),
+            t_amb_c=np.full(n, 23.0),
+            q_load_w=np.full(n, 100.0),
+            q_cool_w=np.full(n, 100.0),
+            v_dot_command_m3s=commands,
+            v_dot_actual_m3s=commands,
+            saturated=np.zeros(n, dtype=bool),
+        )
+        summary = compute_summary(r)
+        assert summary["peak_cfm"] == pytest.approx(m3s_to_cfm(0.08))
+        assert summary["min_commanded_cfm"] == pytest.approx(m3s_to_cfm(0.02))
+
+    def test_settling_time_zero_when_already_in_band(self):
+        from src.sim.experiment import compute_summary
+        # T_inside is exactly at setpoint everywhere → settled from t=0
+        summary = compute_summary(self._flat_result(t_inside_value=23.0))
+        assert summary["settling_time_s"] == pytest.approx(0.0)
+
+    def test_settling_time_inf_when_never_settles(self):
+        from src.sim.experiment import compute_summary
+        # T_inside is constantly 5 °C above setpoint → never settles
+        n = 100
+        r = SimulationResult(
+            t_s=np.linspace(0.0, 100.0, n),
+            t_inside_c=np.full(n, 28.0),       # always 5 °C high
+            t_setpoint_c=np.full(n, 23.0),
+            t_amb_c=np.full(n, 23.0),
+            q_load_w=np.full(n, 100.0),
+            q_cool_w=np.full(n, 100.0),
+            v_dot_command_m3s=np.full(n, 0.04),
+            v_dot_actual_m3s=np.full(n, 0.04),
+            saturated=np.zeros(n, dtype=bool),
+        )
+        summary = compute_summary(r)
+        assert summary["settling_time_s"] == np.inf
+        assert summary["max_excursion_c"] == pytest.approx(5.0)
+
+
+class TestComputeExperimentWarnings:
+    def test_high_saturation_warning(self):
+        from src.sim.experiment import compute_experiment_warnings
+        n = 100
+        r = SimulationResult(
+            t_s=np.linspace(0.0, 100.0, n),
+            t_inside_c=np.full(n, 23.0),
+            t_setpoint_c=np.full(n, 23.0),
+            t_amb_c=np.full(n, 23.0),
+            q_load_w=np.full(n, 100.0),
+            q_cool_w=np.full(n, 100.0),
+            v_dot_command_m3s=np.full(n, 0.04),
+            v_dot_actual_m3s=np.full(n, 0.04),
+            saturated=np.ones(n, dtype=bool),  # saturated 100% of run
+        )
+        warnings = compute_experiment_warnings(r)
+        assert any("saturat" in w.lower() for w in warnings)
+
+    def test_no_warnings_for_clean_run(self):
+        from src.sim.experiment import compute_experiment_warnings
+        warnings = compute_experiment_warnings(
+            TestComputeSummary()._flat_result()
+        )
+        assert warnings == []

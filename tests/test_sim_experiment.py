@@ -107,3 +107,95 @@ class TestValidateExperimentInputs:
             controller=_pid(), scenario=laser_thermal_cycling(),
             t_setpoint_c=23.0,
         )
+
+
+class TestRunExperiment:
+    def test_no_disturbance_stays_at_setpoint(self):
+        """Constant Q_load and T_amb at the equilibrium operating point.
+        T_inside should remain at setpoint (within numerical tolerance) and
+        V_actual should remain at V_init for the entire run."""
+        from src.sim.experiment import run_experiment
+        from src.sim.scenarios import Scenario, ScenarioPoint
+
+        # Build a flat scenario at equilibrium with the test plant params:
+        # V_eq = 100 / (1.19 * 1005 * 5) ≈ 0.016724 m³/s, well within fan range.
+        flat = Scenario(
+            name="flat", description="constant load and ambient",
+            points=(
+                ScenarioPoint(t_s=0.0,   q_load_w=100.0, t_amb_c=23.0),
+                ScenarioPoint(t_s=120.0, q_load_w=100.0, t_amb_c=23.0),
+            ),
+            duration_s=120.0,
+            timestep_s=1.0,
+        )
+        result = run_experiment(
+            scenario=flat,
+            plant_params=_plant(),
+            fan_params=_fan(),
+            controller=_pid(),
+            t_setpoint_c=23.0,
+        )
+        assert result.t_inside_c[-1] == pytest.approx(23.0, abs=1e-4)
+        assert result.v_dot_actual_m3s[-1] == pytest.approx(
+            result.v_dot_actual_m3s[0], rel=1e-3,
+        )
+        assert not result.saturated.any()
+
+    def test_small_ambient_step_recovers_to_setpoint(self):
+        """A 1 °C ambient step should produce a small transient that the
+        controller drives back near the setpoint by the end of a 30-minute run."""
+        from src.sim.experiment import run_experiment
+        from src.sim.scenarios import Scenario, ScenarioPoint
+
+        s = Scenario(
+            name="small_step", description="",
+            points=(
+                ScenarioPoint(t_s=0.0,    q_load_w=100.0, t_amb_c=23.0),
+                ScenarioPoint(t_s=60.0,   q_load_w=100.0, t_amb_c=24.0),
+                ScenarioPoint(t_s=1800.0, q_load_w=100.0, t_amb_c=24.0),
+            ),
+            duration_s=1800.0,
+            timestep_s=1.0,
+        )
+        result = run_experiment(
+            scenario=s,
+            plant_params=_plant(),
+            fan_params=_fan(),
+            controller=_pid(),
+            t_setpoint_c=23.0,
+        )
+        # Last 60 samples should all be very close to setpoint
+        assert np.all(np.abs(result.t_inside_c[-60:] - 23.0) < 0.5)
+
+    def test_returns_correct_array_shapes(self):
+        """All output arrays must have the same length, equal to the
+        number of timesteps in the scenario."""
+        from src.sim.experiment import run_experiment
+        from src.sim.scenarios import Scenario, ScenarioPoint
+
+        s = Scenario(
+            name="short", description="",
+            points=(
+                ScenarioPoint(t_s=0.0,  q_load_w=100.0, t_amb_c=23.0),
+                ScenarioPoint(t_s=10.0, q_load_w=100.0, t_amb_c=23.0),
+            ),
+            duration_s=10.0,
+            timestep_s=1.0,
+        )
+        result = run_experiment(
+            scenario=s,
+            plant_params=_plant(),
+            fan_params=_fan(),
+            controller=_pid(),
+            t_setpoint_c=23.0,
+        )
+        n = 10  # int(10.0 / 1.0)
+        assert len(result.t_s) == n
+        assert len(result.t_inside_c) == n
+        assert len(result.t_setpoint_c) == n
+        assert len(result.t_amb_c) == n
+        assert len(result.q_load_w) == n
+        assert len(result.q_cool_w) == n
+        assert len(result.v_dot_command_m3s) == n
+        assert len(result.v_dot_actual_m3s) == n
+        assert len(result.saturated) == n

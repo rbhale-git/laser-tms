@@ -47,7 +47,7 @@ class TestDefaultCase:
         result = solve_heater_requirement(
             q_load_w=loads.total_load_w,
             ua_value=ambient.ua_value,
-            ambient_temp_c=ambient.temperature_c,
-            setpoint_c=ambient.temperature_c,
+            ambient_temp_c=ambient.T_ambient_c,
+            setpoint_c=ambient.T_setpoint_c,
         )
         assert result.heater_required_w == pytest.approx(0.0)

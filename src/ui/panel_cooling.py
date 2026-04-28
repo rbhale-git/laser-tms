@@ -1,6 +1,6 @@
 """Panel 4: Cooling plant configuration inputs."""
 import streamlit as st
-from src.models import CoolingType, SolveMode
+from src.models import SolveMode
 
 
 def render_cooling_panel(solve_mode: SolveMode) -> dict:
@@ -9,16 +9,6 @@ def render_cooling_panel(solve_mode: SolveMode) -> dict:
     Returns dict with keys matching CoolingPlant fields.
     """
     with st.expander("COOLING PLANT", expanded=True):
-        cooling_type = st.selectbox(
-            "Cooling type",
-            options=[ct.value for ct in CoolingType],
-            format_func=lambda x: {
-                "air_coil": "Air Coil",
-                "liquid": "Liquid",
-                "hybrid": "Hybrid",
-            }[x],
-        )
-
         c1, c2 = st.columns(2)
         with c1:
             approach = st.number_input(
@@ -80,7 +70,6 @@ def render_cooling_panel(solve_mode: SolveMode) -> dict:
         )
 
     return {
-        "cooling_type": cooling_type,
         "coil_approach_temp_c": approach,
         "coil_max_capacity_w": max_cap,
         "chilled_water_temp_c": chilled_water_temp,

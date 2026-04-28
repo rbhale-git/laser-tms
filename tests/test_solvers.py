@@ -82,6 +82,20 @@ class TestSolveHeaterRequirement:
         )
         assert result.heater_required_w == pytest.approx(7.0, rel=1e-3)
 
+    def test_heater_needed_cold_ambient_below_setpoint(self):
+        """T_amb=19°C, T_set=23°C, UA=2 → loss=8W, load=5W → heater=3W."""
+        result = solve_heater_requirement(
+            q_load_w=5.0, ua_value=2.0, ambient_temp_c=19.0, setpoint_c=23.0,
+        )
+        assert result.heater_required_w == pytest.approx(3.0, rel=1e-3)
+
+    def test_no_heater_warm_ambient_above_setpoint(self):
+        """T_amb=25°C, T_set=23°C → ambient warmer than setpoint, no heating."""
+        result = solve_heater_requirement(
+            q_load_w=100.0, ua_value=2.0, ambient_temp_c=25.0, setpoint_c=23.0,
+        )
+        assert result.heater_required_w == pytest.approx(0.0)
+
 
 class TestComputeWarnings:
     def test_no_warnings_nominal(self):

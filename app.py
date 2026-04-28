@@ -13,9 +13,10 @@ from src.ui.panel_cooling import render_cooling_panel
 from src.ui.panel_results import render_results_panel
 from src.ui.schematic import render_schematic
 from src.ui.physics_card import render_physics_card
+from src.ui.panel_pid_experiment import render_pid_experiment_panel
 from src.models import (
     Enclosure, HeatLoads, CoolingPlant, AmbientConditions,
-    CoolingType, SolveMode,
+    SolveMode,
 )
 from src.solvers import (
     solve_airflow, solve_coolant_flow,
@@ -92,130 +93,136 @@ with st.sidebar:
         unsafe_allow_html=True,
     )
 
-# ── Three-column layout: inputs | schematic | results ──
-col_inputs, col_schematic, col_results = st.columns([3, 5, 3])
+# ── Tabs: Steady State (existing) and PID Experiment (new) ──
+tab_steady, tab_pid = st.tabs(["Steady State", "PID Experiment"])
 
-with col_inputs:
-    st.markdown(
-        '<div class="section-header">SYSTEM PARAMETERS</div>',
-        unsafe_allow_html=True,
+with tab_steady:
+    col_inputs, col_schematic, col_results = st.columns([3, 5, 3])
+
+    with col_inputs:
+        st.markdown(
+            '<div class="section-header">SYSTEM PARAMETERS</div>',
+            unsafe_allow_html=True,
+        )
+        geo = render_geometry_panel(use_imperial)
+        loads_input = render_loads_panel()
+        ambient_input = render_ambient_panel()
+        cooling_input = render_cooling_panel(solve_mode)
+
+    # ── Build models ───────────────────────────────────────
+    enclosure = Enclosure(
+        length_m=geo["length_m"],
+        width_m=geo["width_m"],
+        height_m=geo["height_m"],
+        internal_thermal_mass=geo["internal_thermal_mass"],
     )
-    geo = render_geometry_panel(use_imperial)
-    loads_input = render_loads_panel()
-    ambient_input = render_ambient_panel()
-    cooling_input = render_cooling_panel(solve_mode)
 
-# ── Build models ───────────────────────────────────────
-enclosure = Enclosure(
-    length_m=geo["length_m"],
-    width_m=geo["width_m"],
-    height_m=geo["height_m"],
-    internal_thermal_mass=geo["internal_thermal_mass"],
-)
-
-loads = HeatLoads(
-    baseline_load_w=loads_input["baseline_load_w"],
-    additional_loads_w=loads_input["additional_loads_w"],
-)
-
-# Handle ACH → UA conversion if needed
-ua_value = ambient_input["ua_value"]
-if ambient_input.get("ua_mode") == "Air changes per hour (ACH)":
-    ach = ambient_input["ua_value"]
-    ua_value = ach * enclosure.volume_m3 * AIR_DENSITY * AIR_CP / 3600.0
-
-ambient = AmbientConditions(
-    temperature_c=ambient_input["temperature_c"],
-    variation_amplitude_c=ambient_input["variation_amplitude_c"],
-    variation_period_hr=ambient_input["variation_period_hr"],
-    ua_value=ua_value,
-)
-
-cooling = CoolingPlant(
-    cooling_type=CoolingType(cooling_input["cooling_type"]),
-    coil_approach_temp_c=cooling_input["coil_approach_temp_c"],
-    coil_max_capacity_w=cooling_input["coil_max_capacity_w"],
-    chilled_water_temp_c=cooling_input["chilled_water_temp_c"],
-    delta_t_air_c=cooling_input["delta_t_air_c"],
-    delta_t_water_c=cooling_input["delta_t_water_c"],
-)
-
-# ── Run solvers ────────────────────────────────────────
-q_total = loads.total_load_w
-
-air_result = solve_airflow(
-    q_total_w=q_total, delta_t_air_c=cooling.delta_t_air_c,
-)
-
-coolant_result = solve_coolant_flow(
-    q_total_w=q_total, delta_t_water_c=cooling.delta_t_water_c,
-)
-
-coil_result = solve_coil_leaving_temp(
-    q_total_w=q_total,
-    airflow_kgs=air_result.airflow_kgs,
-    return_air_temp_c=ambient.temperature_c,
-)
-
-heater_result = solve_heater_requirement(
-    q_load_w=q_total,
-    ua_value=ambient.ua_value,
-    ambient_temp_c=ambient.temperature_c,
-    setpoint_c=ambient.temperature_c,
-)
-
-coil_utilization = (q_total / cooling.coil_max_capacity_w) * 100.0
-
-warnings = compute_warnings(
-    coil_utilization_pct=coil_utilization,
-    heater_required_w=heater_result.heater_required_w,
-)
-
-# ── Center column: system schematic ────────────────────
-with col_schematic:
-    st.markdown(
-        '<div class="section-header">SYSTEM SCHEMATIC</div>',
-        unsafe_allow_html=True,
+    loads = HeatLoads(
+        baseline_load_w=loads_input["baseline_load_w"],
+        additional_loads_w=loads_input["additional_loads_w"],
     )
-    cfm = m3s_to_cfm(air_result.airflow_m3s)
-    lpm = kgs_to_lpm(coolant_result.coolant_kgs)
 
-    fig = render_schematic(
-        enclosure_temp_c=ambient.temperature_c,
-        supply_temp_c=coil_result.coil_leaving_temp_c,
-        return_temp_c=ambient.temperature_c,
-        ambient_temp_c=ambient.temperature_c,
-        chilled_water_temp_c=cooling.chilled_water_temp_c,
-        airflow_cfm=cfm,
-        coolant_lpm=lpm,
-        heat_load_w=q_total,
-        ua_value=ambient.ua_value,
+    # Handle ACH → UA conversion if needed
+    ua_value = ambient_input["ua_value"]
+    if ambient_input.get("ua_mode") == "Air changes per hour (ACH)":
+        ach = ambient_input["ua_value"]
+        ua_value = ach * enclosure.volume_m3 * AIR_DENSITY * AIR_CP / 3600.0
+
+    ambient = AmbientConditions(
+        T_ambient_c=ambient_input["T_ambient_c"],
+        T_setpoint_c=ambient_input["T_setpoint_c"],
+        T_ambient_variation_c=ambient_input["T_ambient_variation_c"],
+        ua_value=ua_value,
     )
-    st.plotly_chart(fig, use_container_width=True, theme=None)
 
-    render_physics_card(
+    cooling = CoolingPlant(
+        coil_approach_temp_c=cooling_input["coil_approach_temp_c"],
+        coil_max_capacity_w=cooling_input["coil_max_capacity_w"],
+        chilled_water_temp_c=cooling_input["chilled_water_temp_c"],
+        delta_t_air_c=cooling_input["delta_t_air_c"],
+        delta_t_water_c=cooling_input["delta_t_water_c"],
+    )
+
+    # ── Run solvers ────────────────────────────────────────
+    q_total = loads.total_load_w
+
+    air_result = solve_airflow(
+        q_total_w=q_total, delta_t_air_c=cooling.delta_t_air_c,
+    )
+
+    coolant_result = solve_coolant_flow(
+        q_total_w=q_total, delta_t_water_c=cooling.delta_t_water_c,
+    )
+
+    coil_result = solve_coil_leaving_temp(
         q_total_w=q_total,
-        delta_t_air_c=cooling.delta_t_air_c,
-        delta_t_water_c=cooling.delta_t_water_c,
-        ua_value=ambient.ua_value,
-        ambient_temp_c=ambient.temperature_c,
-        setpoint_c=ambient.temperature_c,
-        airflow_cfm=cfm,
-        airflow_m3s=air_result.airflow_m3s,
-        coolant_lpm=lpm,
-        coil_leaving_temp_c=coil_result.coil_leaving_temp_c,
-        thermal_capacitance=enclosure.thermal_capacitance,
-        volume_m3=enclosure.volume_m3,
+        airflow_kgs=air_result.airflow_kgs,
+        return_air_temp_c=ambient.T_setpoint_c,
     )
 
-# ── Right column: results ──────────────────────────────
-with col_results:
-    render_results_panel(
-        airflow_m3s=air_result.airflow_m3s,
-        coolant_kgs=coolant_result.coolant_kgs,
+    heater_result = solve_heater_requirement(
+        q_load_w=q_total,
+        ua_value=ambient.ua_value,
+        ambient_temp_c=ambient.T_ambient_low,
+        setpoint_c=ambient.T_setpoint_c,
+    )
+
+    coil_utilization = (q_total / cooling.coil_max_capacity_w) * 100.0
+
+    warnings = compute_warnings(
         coil_utilization_pct=coil_utilization,
         heater_required_w=heater_result.heater_required_w,
-        coil_leaving_temp_c=coil_result.coil_leaving_temp_c,
-        warnings=warnings,
-        solve_mode=solve_mode,
+    )
+
+    with col_schematic:
+        st.markdown(
+            '<div class="section-header">SYSTEM SCHEMATIC</div>',
+            unsafe_allow_html=True,
+        )
+        cfm = m3s_to_cfm(air_result.airflow_m3s)
+        lpm = kgs_to_lpm(coolant_result.coolant_kgs)
+
+        fig = render_schematic(
+            enclosure_temp_c=ambient.T_setpoint_c,
+            supply_temp_c=coil_result.coil_leaving_temp_c,
+            return_temp_c=ambient.T_setpoint_c,
+            ambient_temp_c=ambient.T_ambient_c,
+            chilled_water_temp_c=cooling.chilled_water_temp_c,
+            airflow_cfm=cfm,
+            coolant_lpm=lpm,
+            heat_load_w=q_total,
+            ua_value=ambient.ua_value,
+        )
+        st.plotly_chart(fig, use_container_width=True, theme=None)
+
+        render_physics_card(
+            q_total_w=q_total,
+            delta_t_air_c=cooling.delta_t_air_c,
+            delta_t_water_c=cooling.delta_t_water_c,
+            ua_value=ambient.ua_value,
+            ambient_temp_c=ambient.T_ambient_c,
+            setpoint_c=ambient.T_setpoint_c,
+            airflow_cfm=cfm,
+            airflow_m3s=air_result.airflow_m3s,
+            coolant_lpm=lpm,
+            coil_leaving_temp_c=coil_result.coil_leaving_temp_c,
+            thermal_capacitance=enclosure.thermal_capacitance,
+            volume_m3=enclosure.volume_m3,
+        )
+
+    with col_results:
+        render_results_panel(
+            airflow_m3s=air_result.airflow_m3s,
+            coolant_kgs=coolant_result.coolant_kgs,
+            coil_utilization_pct=coil_utilization,
+            heater_required_w=heater_result.heater_required_w,
+            coil_leaving_temp_c=coil_result.coil_leaving_temp_c,
+            warnings=warnings,
+            solve_mode=solve_mode,
+        )
+
+with tab_pid:
+    render_pid_experiment_panel(
+        enclosure_thermal_capacitance_j_per_k=enclosure.thermal_capacitance,
+        ua_value_w_per_k=ambient.ua_value,
     )

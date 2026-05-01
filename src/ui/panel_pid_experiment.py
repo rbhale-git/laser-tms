@@ -41,6 +41,65 @@ SCENARIO_BUILDERS = {
     "B-slow — Ambient diurnal half-sine (6 h)": ambient_diurnal,
 }
 
+SCENARIO_DESCRIPTIONS = {
+    "A — Laser thermal cycling": (
+        "**Tests heat-load disturbance rejection.** 3 cycles of laser on "
+        "(100 W, 5 min hold) / off (0 W, 5 min hold) with 60 s ramps between. "
+        "Total ~33 min, dt = 0.5 s. Expect the fan to saturate low during "
+        "the 0 W holds — equilibrium CFM there is below V_min."
+    ),
+    "B-sharp — Ambient step ±6.5 °C": (
+        "**Tests fast ambient disturbance rejection.** T_amb steps "
+        "23.5 → 30 °C in 60 s, holds 15 min, returns. Constant 100 W laser. "
+        "Total ~32 min, dt = 0.5 s."
+    ),
+    "B-slow — Ambient diurnal half-sine (6 h)": (
+        "**Tests slow ambient drift (day/night cycle).** T_amb traces a "
+        "smooth half-sine 23.5 → 30 → 23.5 °C over 6 hours. Constant "
+        "100 W laser. dt = 5 s."
+    ),
+}
+
+HELP_KP = (
+    "Proportional gain (m³/s per °C). How aggressively the fan responds "
+    "to instantaneous error. Higher Kp → faster response but risks "
+    "overshoot and oscillation. Default = 5 CFM/K converted to SI."
+)
+HELP_KI = (
+    "Integral gain (m³/s per °C·s). Drives steady-state offset to zero "
+    "by accumulating past error. Conditional-integration anti-windup is "
+    "enabled (skips integration when actuator is saturated). "
+    "Default = 0.5 CFM/(K·s)."
+)
+HELP_KD = (
+    "Derivative gain (m³/s per °C/s). Damps oscillation by reacting to "
+    "the rate of change of temperature. Computed on the measurement "
+    "(not the error) to avoid setpoint-change kicks. "
+    "Default = 10 CFM·s/K."
+)
+HELP_TAU_FAN = (
+    "First-order fan lag time constant. Actual CFM reaches ~63% of a "
+    "commanded change in τ seconds, ~95% in 3τ. Models inertia of fan "
+    "blades and motor. Default = 3 s."
+)
+HELP_T_SUPPLY = (
+    "Air temperature leaving the chilled-water coil and entering the "
+    "enclosure. Must be below the 23 °C setpoint or the system cannot "
+    "cool (validation will reject). Default = 18 °C."
+)
+HELP_V_MIN = (
+    "Lower clamp on fan speed — typically the HEPA filter pressure-drop "
+    "floor or a minimum circulation requirement. When the controller "
+    "wants less than this, the fan pins here and the loop is 'saturated "
+    "low'. Default = 30 CFM."
+)
+HELP_V_MAX = (
+    "Upper clamp on fan speed — typically the turbulence / optical-"
+    "sensitivity ceiling. When the controller wants more, the fan pins "
+    "here and the loop is 'saturated high' (T_inside drifts above "
+    "setpoint). Default = 150 CFM."
+)
+
 
 def render_pid_experiment_panel(
     enclosure_thermal_capacitance_j_per_k: float,
@@ -56,44 +115,77 @@ def render_pid_experiment_panel(
         unsafe_allow_html=True,
     )
 
+    st.markdown(
+        "Closed-loop time-domain simulation. A PID controller modulates "
+        "fan CFM to hold T_inside at the 23 °C setpoint against the "
+        "chosen disturbance. Plant parameters (thermal mass, UA) come "
+        "from the Geometry and Ambient panels in the Steady State tab — "
+        "change them there to see how dynamics shift."
+    )
+
     # ── Scenario picker ─────────────────────────────────────
     scenario_label = st.radio(
         "Disturbance scenario",
         options=list(SCENARIO_BUILDERS.keys()),
         index=0,
         horizontal=False,
+        help=(
+            "Each scenario stresses a different part of the loop: A "
+            "exercises heat-load rejection, B-sharp tests fast ambient "
+            "rejection, B-slow tests slow drift tracking."
+        ),
     )
+    st.caption(SCENARIO_DESCRIPTIONS[scenario_label])
 
     # ── Advanced controls ───────────────────────────────────
     with st.expander("Advanced controller and plant parameters", expanded=False):
+        st.markdown(
+            "**Controller gains** set how the PID loop responds to "
+            "temperature error. **Plant parameters** set the physical "
+            "limits of the fan and cooling coil. Hover the `?` next to "
+            "each input for details."
+        )
         c1, c2 = st.columns(2)
         with c1:
-            kp = st.number_input("PID Kp", value=default_pid_controller().kp,
-                                 min_value=0.0, step=0.0001, format="%.4f")
-            ki = st.number_input("PID Ki", value=default_pid_controller().ki,
-                                 min_value=0.0, step=0.0001, format="%.4f")
-            kd = st.number_input("PID Kd", value=default_pid_controller().kd,
-                                 min_value=0.0, step=0.0001, format="%.4f")
+            kp = st.number_input(
+                "PID Kp", value=default_pid_controller().kp,
+                min_value=0.0, step=0.0001, format="%.4f",
+                help=HELP_KP,
+            )
+            ki = st.number_input(
+                "PID Ki", value=default_pid_controller().ki,
+                min_value=0.0, step=0.0001, format="%.4f",
+                help=HELP_KI,
+            )
+            kd = st.number_input(
+                "PID Kd", value=default_pid_controller().kd,
+                min_value=0.0, step=0.0001, format="%.4f",
+                help=HELP_KD,
+            )
         with c2:
             tau_fan = st.number_input(
                 "Fan time constant τ_fan (s)",
                 value=default_fan_params().tau_s,
                 min_value=0.1, step=0.5, format="%.1f",
+                help=HELP_TAU_FAN,
             )
             t_supply = st.number_input(
                 "Coil supply temp T_supply (°C)",
                 value=default_t_supply_c(),
                 min_value=0.0, max_value=30.0, step=0.5,
+                help=HELP_T_SUPPLY,
             )
             v_min_cfm = st.number_input(
                 "Fan min CFM",
                 value=m3s_to_cfm(default_fan_params().v_dot_min_m3s),
                 min_value=0.0, step=5.0,
+                help=HELP_V_MIN,
             )
             v_max_cfm = st.number_input(
                 "Fan max CFM",
                 value=m3s_to_cfm(default_fan_params().v_dot_max_m3s),
                 min_value=1.0, step=10.0,
+                help=HELP_V_MAX,
             )
 
     setpoint_c = default_t_setpoint_c()
